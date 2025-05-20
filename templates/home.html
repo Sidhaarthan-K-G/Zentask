@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Zentask · Home</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/home.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@500&display=swap" rel="stylesheet">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="{{ url_for('home') }}" class="logo-link">
+                <img src="{{ url_for('static', filename='Zentaskw.jpg') }}" alt="Zentask Logo" class="logo-img">
+                <span class="logo-text">Zentask</span>
+            </a>
+            <ul class="nav-links">
+                <li><a href="{{ url_for('home') }}">Home</a></li>
+                <li><a href="{{ url_for('login') }}">Login</a></li>
+                <li><a href="{{ url_for('signup') }}">Signup</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <header class="hero">
+        <h1>Manage your tasks effortlessly</h1>
+        <p>Organize, schedule, and track your tasks with Zentask — your personal task manager.</p>
+        <a href="{{ url_for('signup') }}" class="cta">Get Started</a>
+    </header>
+
+    <footer>
+        <p>&copy; 2025 Zentask, Inc.</p>
+    </footer>
+</body>
+</html>

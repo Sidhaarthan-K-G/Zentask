@@ -1,0 +1,30 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+    <h3>Create New Task</h3>
+    <form method="POST" action="/new-task">
+        <div class="mb-3">
+            <label class="form-label">Task Title</label>
+            <input type="text" class="form-control" name="title" required>
+        </div>
+        <div class="mb-3">
+            <label class="form-label">Description</label>
+            <textarea class="form-control" name="description" rows="3" required></textarea>
+        </div>
+        <div class="mb-3">
+            <label class="form-label">Due Date</label>
+            <input type="date" class="form-control" name="due_date" required>
+        </div>
+        <div class="mb-3">
+            <label class="form-label">Priority</label>
+            <select class="form-select" name="priority" required>
+                <option value="Low">Low</option>
+                <option value="Normal" selected>Normal</option>
+                <option value="High">High</option>
+            </select>
+        </div>
+        <button type="submit" class="btn btn-success">Create Task</button>
+    </form>
+</div>
+{% endblock %}
