@@ -76,6 +76,15 @@ def signup():
 @app.route("/dashboard")
 def dashboard():
     return render_template("dashboard.html")
+@app.route("/my_tasks")
+def my_tasks():
+    return render_template("my_tasks.html")
+@app.route("/new_task")
+def new_tasks():
+    return render_template("new_task.html")
+@app.route("/logout")
+def logout():
+    return render_template("login.html")
 
 if __name__=="__main__":
     app.run(debug=True)
