@@ -1,4 +1,10 @@
-from flask import Flask,render_template,request,redirect,url_for,flash,session
+from flask import Flask
+from flask import render_template
+from flask import request
+from flask import redirect
+from flask import url_for
+from flask import flash
+from flask import session
 from src.db import Execute
 
 app=Flask(__name__)
@@ -28,6 +34,7 @@ def login():
 
             if user:
                 session["user_id"] = user["signup_id"]
+                session["email"]=user["email"]
                 flash("Login successful!")
                 return redirect(url_for("dashboard", user=user["username"]))
             
@@ -63,7 +70,8 @@ def signup():
 
             # Insert new user
             e.signup_values(data)
-            return redirect(url_for("dashboard", user=data["username"]))
+            
+            return redirect(url_for("dashboard", user=data["email"]))
         
         return render_template("signup.html")
     except Exception as e:
@@ -75,15 +83,44 @@ def signup():
     
 @app.route("/dashboard")
 def dashboard():
-    return render_template("dashboard.html")
-@app.route("/my_tasks")
-def my_tasks():
-    return render_template("my_tasks.html")
-@app.route("/new_task")
+    try:
+        if "email" not in session:
+            flash("Please log in to view dashboard")
+            return redirect(url_for("login"))
+        e=Execute()
+        tasks=e.get_tasks(session["email"])
+        return render_template("dashboard.html",tasks=tasks)
+    except Exception as e:
+        print("Error loading dashboard:", e)
+        flash("Error loading tasks. Please try again.")
+        return redirect(url_for("login"))
+    
+    
+@app.route("/new_task",methods=["POST","GET"])
 def new_tasks():
-    return render_template("new_task.html")
+    try:
+        if "email" not in session:
+            flash("Please log in to add a task.")
+            return redirect(url_for("login"))
+        if request.method == "POST":
+            data={
+                "task":request.form.get("task").strip(),
+                "date":request.form.get("date").strip(),
+                "priority":request.form.get("priority").strip(),
+                "email":session["email"]
+            }
+            e=Execute()
+            e.insert_task(data)
+            return redirect(url_for("dashboard"))
+        return render_template("new_task.html")
+    except Exception as e:
+        print("Task not added:",e)
+        flash("An error occurred during adding the task. Please try again.")
+        return redirect(url_for("new_task"))
 @app.route("/logout")
 def logout():
+    session.clear()
+    flash("You have been logged out.")
     return render_template("login.html")
 
 if __name__=="__main__":

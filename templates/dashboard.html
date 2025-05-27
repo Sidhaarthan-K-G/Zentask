@@ -10,6 +10,7 @@
     
     <!-- Custom CSS -->
     <link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 </head>
 <body>
 
@@ -21,7 +22,7 @@
             <div class="brand">Zentask</div>
         </a>
         <div class="d-flex ms-auto">
-            <a href="#" class="btn btn-outline-light me-2">Profile</a>
+            
             <a href="/logout" class="btn btn-outline-danger">Logout</a>
         </div>
     </div>
@@ -34,56 +35,51 @@
         <div class="col-md-2 bg-light vh-100 p-3">
             <h6 class="text-muted">Menu</h6>
             <ul class="nav flex-column">
-                <li class="nav-item"><a class="nav-link active" href="/dashboard">Dashboard</a></li>
-                <li class="nav-item"><a class="nav-link" href="/my_tasks">My Tasks</a></li>
-                <li class="nav-item"><a class="nav-link" href="/new_task">New Task</a></li>
+                <li class="nav-item"><a class="nav-link active" href="/dashboard"><i class="fa-solid fa-table-columns me-2"></i>Dashboard</a></li>
+                <li class="nav-item"><a class="nav-link" href="/new_task"><i class="fa-solid fa-plus me-2"></i>New Task</a></li>
             </ul>
         </div>
 
-        <!-- Content -->
+        <!-- Main content -->
         <div class="col-md-10 p-4">
-            <h3>Welcome, {{ user }}</h3>
-            <p class="text-muted">Your task summary for today:</p>
-
-            <div class="row g-3 mb-4">
-                <div class="col-md-4">
-                    <div class="card border-success shadow-sm">
-                        <div class="card-body text-center">
-                            <h5>Pending Tasks</h5>
-                            <p class="fs-3 text-success">3</p>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-4">
-                    <div class="card border-warning shadow-sm">
-                        <div class="card-body text-center">
-                            <h5>In Progress</h5>
-                            <p class="fs-3 text-warning">5</p>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-4">
-                    <div class="card border-primary shadow-sm">
-                        <div class="card-body text-center">
-                            <h5>Completed</h5>
-                            <p class="fs-3 text-primary">8</p>
-                        </div>
-                    </div>
-                </div>
+            <!-- Spinner -->
+            <div id="spinner" class="text-center">
+                <p>Loading tasks... <img src="https://i.imgur.com/llF5iyg.gif" alt="spinner" width="30"></p>
             </div>
 
-            <h5>Upcoming Deadlines</h5>
-            <ul class="list-group">
-                <li class="list-group-item d-flex justify-content-between align-items-center">
-                    Update Project Roadmap <span class="badge bg-danger">Due today</span>
-                </li>
-                <li class="list-group-item d-flex justify-content-between align-items-center">
-                    Sprint Review <span class="badge bg-warning text-dark">Tomorrow</span>
-                </li>
-            </ul>
+            <!-- Task Table -->
+            <div id="taskTableContainer" class="hidden">
+                <h4 class="mb-3"><i class="fa-solid fa-list-check me-2"></i>Your Tasks</h4>
+                <div class="table-responsive" style="max-height: 500px; overflow-y: auto;">
+                    <table class="table table-bordered table-hover">
+                        <thead class="table-light sticky-top">
+                            <tr>
+                                <th><i class="fa-solid fa-tasks me-1"></i>Task</th>
+                                <th><i class="fa-solid fa-align-left me-1"></i>Description</th>
+                                <th><i class="fa-solid fa-calendar-days me-1"></i>Due Date</th>
+                                <th><i class="fa-solid fa-check-double me-1"></i>Status</th>
+                                <th><i class="fa-solid fa-arrow-up me-1"></i>Priority</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for task in tasks %}
+                            <tr>
+                                <td>{{ task.Task }}</td>
+                                <td>{{ task.Description }}</td>
+                                <td>{{ task.Due_date }}</td>
+                                <td contenteditable="true">{{ task.Status }}</td>
+                                <td contenteditable="true">{{ task.Priority }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
         </div>
     </div>
 </div>
+
+<script src="{{url_for('static', filename='js/dashboard.js')}}"></script>
 
 </body>
 </html>

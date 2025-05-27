@@ -10,6 +10,9 @@
     
     <!-- Custom CSS -->
     <link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
 </head>
 <body>
 
@@ -21,7 +24,7 @@
             <div class="brand">Zentask</div>
         </a>
         <div class="d-flex ms-auto">
-            <a href="#" class="btn btn-outline-light me-2">Profile</a>
+            
             <a href="/logout" class="btn btn-outline-danger">Logout</a>
         </div>
     </div>
@@ -34,56 +37,48 @@
         <div class="col-md-2 bg-light vh-100 p-3">
             <h6 class="text-muted">Menu</h6>
             <ul class="nav flex-column">
-                <li class="nav-item"><a class="nav-link active" href="/dashboard">Dashboard</a></li>
-                <li class="nav-item"><a class="nav-link" href="/my_tasks">My Tasks</a></li>
-                <li class="nav-item"><a class="nav-link" href="/new_task">New Task</a></li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/dashboard"><i class="fa-solid fa-table-columns me-2"></i>Dashboard</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link active" href="/new_task"><i class="fa-solid fa-plus me-2"></i>New Task</a>
+                </li>
             </ul>
         </div>
 
-        <!-- Content -->
-        <div class="col-md-10 p-4">
-            <h3>Welcome, {{ user }}</h3>
-            <p class="text-muted">Your task summary for today:</p>
-
-            <div class="row g-3 mb-4">
-                <div class="col-md-4">
-                    <div class="card border-success shadow-sm">
-                        <div class="card-body text-center">
-                            <h5>Pending Tasks</h5>
-                            <p class="fs-3 text-success">3</p>
-                        </div>
+        <!-- Add Task Form -->
+        <div class="col-md-10 content-form-wrapper d-flex justify-content-center align-items-center">
+            <div class="form-container w-75">
+                <h3 class="mb-4"><i class="fa-solid fa-pen-to-square me-2"></i>Add a new task:</h3>
+                <form method="POST" action="/new_task">
+                    <div class="mb-3 input-group">
+                        <span class="input-group-text"><i class="fa-solid fa-tasks"></i></span>
+                        <input type="text" name="task" id="task" class="form-control" placeholder="Task Name" required>
                     </div>
-                </div>
-                <div class="col-md-4">
-                    <div class="card border-warning shadow-sm">
-                        <div class="card-body text-center">
-                            <h5>In Progress</h5>
-                            <p class="fs-3 text-warning">5</p>
-                        </div>
+                    <div class="mb-3 input-group">
+                        <span class="input-group-text"><i class="fa-solid fa-calendar-days"></i></span>
+                        <input type="date" name="date" id="date" class="form-control" required>
                     </div>
-                </div>
-                <div class="col-md-4">
-                    <div class="card border-primary shadow-sm">
-                        <div class="card-body text-center">
-                            <h5>Completed</h5>
-                            <p class="fs-3 text-primary">8</p>
-                        </div>
+                    <div class="mb-3 input-group">
+                        <span class="input-group-text"><i class="fa-solid fa-arrow-up-wide-short"></i></span>
+                        <select name="priority" class="form-select" required>
+                            <option value="" selected disabled>Priority</option>
+                            <option value="high">High</option>
+                            <option value="medium">Medium</option>
+                            <option value="low">Low</option>
+                        </select>
                     </div>
-                </div>
+                    <div class="text-center">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fa-solid fa-plus me-1"></i>Add Task
+                        </button>
+                    </div>
+                </form>
             </div>
-
-            <h5>Upcoming Deadlines</h5>
-            <ul class="list-group">
-                <li class="list-group-item d-flex justify-content-between align-items-center">
-                    Update Project Roadmap <span class="badge bg-danger">Due today</span>
-                </li>
-                <li class="list-group-item d-flex justify-content-between align-items-center">
-                    Sprint Review <span class="badge bg-warning text-dark">Tomorrow</span>
-                </li>
-            </ul>
         </div>
     </div>
 </div>
 
+<script src="{{url_for('static',filename='js/new_task.js')}}"></script>
 </body>
 </html>

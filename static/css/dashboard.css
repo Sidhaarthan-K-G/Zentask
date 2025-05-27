@@ -107,3 +107,64 @@ h3, h5 {
     justify-content: space-between;
     align-items: center;
 }
+
+
+.content-form-wrapper {
+     /* push it down a bit from the top */
+    display: flex;
+    justify-content: center; /* center horizontally */
+    padding-bottom: 180px;
+}
+
+.form-container {
+    width: 100%;
+    max-width: 600px;
+    padding: 30px;
+    background-color: #fff;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+}
+ #taskTableContainer {
+        max-height: 500px;  /* Adjust as needed */
+        overflow-y: auto;
+        overflow-x: auto;
+    }
+
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        table-layout: fixed;
+    }
+
+    th, td {
+        white-space: nowrap;
+        padding: 8px 12px;
+        border: 1px solid #dee2e6;
+        text-align: left;
+    }
+
+    thead th {
+        position: sticky;
+        top: 0;
+        background-color: #f8f9fa;
+        z-index: 10;
+    }
+
+    td[contenteditable="true"] {
+        background-color: #fff8dc;
+    }
+
+    /* Optional: Add horizontal scroll styling for aesthetics */
+    #taskTableContainer::-webkit-scrollbar {
+        height: 8px;
+        width: 8px;
+    }
+
+    #taskTableContainer::-webkit-scrollbar-thumb {
+        background: #ccc;
+        border-radius: 4px;
+    }
+
+    #taskTableContainer::-webkit-scrollbar-track {
+        background: #f1f1f1;
+    }

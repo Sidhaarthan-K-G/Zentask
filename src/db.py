@@ -60,7 +60,7 @@ class Execute:
         try:
             self.insert("""
             INSERT IGNORE INTO login_details (email, password)
-            VALUES (%(email)s, %(password)s""")
+            VALUES (%(email)s, %(password)s""",data)
 
         except Exception as e:
             print("Data not inserted:",e)
@@ -126,16 +126,38 @@ class Execute:
                 create table if not exists tasks(
                     Task_id int auto_increment primary key,
                     Task varchar(255)not null,
-                    Description varchar(255)not null,
                     Due_date varchar(255)not null,
                     Priority varchar(255) not null,
-                    Status varchar(255)default "Not Done")
+                    Status varchar(255)default "Not Done",
+                    email varchar(255)not null)
                 """)
         except Exception as e:
             print("Table not created",e)
             
+    def insert_task(self,data):
+        try:
+            self.insert("""
+            INSERT INTO tasks (Task, Due_date, Priority, Status, Email)
+            VALUES (%(task)s, %(date)s, %(priority)s, 'Not Done', %(email)s)
+        """, data)
+        except Exception as e:
+            print("Task not added:",e)
+            return []
     
-            
+    
+    def get_tasks(self,email):
+        cur=None
+        try:
+            cur=self.conn.cursor(dictionary=True)
+            cur.execute("SELECT * FROM tasks WHERE Email = %s ORDER BY Status ASC", (email,))
+            tasks=cur.fetchall()
+            return (tasks)
+        except Exception as e:
+            print("Error fetching tasks:", e)
+            return []
+        finally:
+            if cur:
+                cur.close()
     def __del__(self):
         if self.conn:
             self.conn.close()
