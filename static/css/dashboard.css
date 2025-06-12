@@ -124,7 +124,7 @@ h3, h5 {
     border-radius: 10px;
     box-shadow: 0 0 10px rgba(0,0,0,0.1);
 }
- #taskTableContainer {
+ .taskTableContainer {
         max-height: 500px;  /* Adjust as needed */
         overflow-y: auto;
         overflow-x: auto;
@@ -155,16 +155,16 @@ h3, h5 {
     }
 
     /* Optional: Add horizontal scroll styling for aesthetics */
-    #taskTableContainer::-webkit-scrollbar {
+    .taskTableContainer::-webkit-scrollbar {
         height: 8px;
         width: 8px;
     }
 
-    #taskTableContainer::-webkit-scrollbar-thumb {
+    .taskTableContainer::-webkit-scrollbar-thumb {
         background: #ccc;
         border-radius: 4px;
     }
 
-    #taskTableContainer::-webkit-scrollbar-track {
+    .taskTableContainer::-webkit-scrollbar-track {
         background: #f1f1f1;
     }

@@ -3,7 +3,7 @@ from flask import render_template
 from flask import request
 from flask import redirect
 from flask import url_for
-from flask import flash
+from flask import flash,jsonify
 from flask import session
 from src.db import Execute
 
@@ -26,28 +26,27 @@ def home():
 def login():
     try:
         if request.method == "POST":
-            email = request.form.get("email")
-            password = request.form.get("password")
-
+            data = {
+                "email": request.form.get("email").strip().lower(),
+                "password": request.form.get("password")
+            }
             e = Execute()
-            user = e.verify_login(email, password)
-
+            user = e.verify_login(data["email"], data["password"])
             if user:
+                # Set session variables
                 session["user_id"] = user["signup_id"]
-                session["email"]=user["email"]
+                session["email"] = user["email"]
                 flash("Login successful!")
+                e.login_values(data)
                 return redirect(url_for("dashboard", user=user["username"]))
-            
             else:
                 flash("Invalid email or password.")
                 return redirect(url_for("login"))
-
         return render_template("login.html")
     except Exception as e:
         print("Login error:", e)
         flash("An error occurred during login. Please try again.")
         return render_template("login.html")
-
 
 
 @app.route('/signup', methods=["GET", "POST"])
@@ -87,14 +86,28 @@ def dashboard():
         if "email" not in session:
             flash("Please log in to view dashboard")
             return redirect(url_for("login"))
-        e=Execute()
-        tasks=e.get_tasks(session["email"])
-        return render_template("dashboard.html",tasks=tasks)
+        e = Execute()
+        user_data = e.get_user_by_email(session["email"])  # You'll add this method
+        username = user_data.get("username") if user_data else "User"
+
+        return render_template("dashboard.html", username=username)
     except Exception as e:
         print("Error loading dashboard:", e)
         flash("Error loading tasks. Please try again.")
         return redirect(url_for("login"))
     
+@app.route("/api/get_tasks",methods=["GET"])
+def get_tasks():
+    try:
+        if "email" not in session:
+            return jsonify({"error":"Unauthorized"}),401
+        e=Execute()
+        tasks=e.get_tasks(session["email"])
+        print(tasks)
+        return jsonify({"tasks":tasks})
+    except Exception as e:
+        print("Error fetching tasks:",e)
+        return[]
     
 @app.route("/new_task",methods=["POST","GET"])
 def new_tasks():

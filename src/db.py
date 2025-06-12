@@ -24,7 +24,7 @@ class Execute:
         try:
             cur=self.conn.cursor()
             cur.execute(query)
-            print("Table created Successfully")
+            
         except Exception as e:
             print("Execution Failed:",e)
         finally:
@@ -59,8 +59,9 @@ class Execute:
     def login_values(self,data):
         try:
             self.insert("""
-            INSERT IGNORE INTO login_details (email, password)
-            VALUES (%(email)s, %(password)s""",data)
+                INSERT INTO login_details (email, password)
+                VALUES (%(email)s, %(password)s)
+            """,data)
 
         except Exception as e:
             print("Data not inserted:",e)
@@ -143,7 +144,19 @@ class Execute:
         except Exception as e:
             print("Task not added:",e)
             return []
-    
+    def get_user_by_email(self, email):
+        cur = None
+        try:
+            cur = self.conn.cursor(dictionary=True)
+            cur.execute("SELECT username FROM signup_details WHERE email = %s", (email,))
+            return cur.fetchone()
+        except Exception as e:
+            print("Error fetching user info:", e)
+            return None
+        finally:
+            if cur:
+                cur.close()
+
     
     def get_tasks(self,email):
         cur=None
@@ -151,6 +164,7 @@ class Execute:
             cur=self.conn.cursor(dictionary=True)
             cur.execute("SELECT * FROM tasks WHERE Email = %s ORDER BY Status ASC", (email,))
             tasks=cur.fetchall()
+            print(tasks)
             return (tasks)
         except Exception as e:
             print("Error fetching tasks:", e)
@@ -158,6 +172,8 @@ class Execute:
         finally:
             if cur:
                 cur.close()
+                
+    
     def __del__(self):
         if self.conn:
             self.conn.close()

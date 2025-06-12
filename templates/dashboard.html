@@ -43,32 +43,38 @@
         <!-- Main content -->
         <div class="col-md-10 p-4">
             <!-- Spinner -->
-            <div id="spinner" class="text-center">
-                <p>Loading tasks... <img src="https://i.imgur.com/llF5iyg.gif" alt="spinner" width="30"></p>
+            <div id="spinner" style="display: none;" class="spinner-wrapper">
+                <i class="fa fa-spinner fa-spin fa-3x fa-fw text-light"></i>
+                <div class="mt-2 text-white">Lodaing Tasks...</div>
+                <span class="visually-hidden">Loading...</span>
             </div>
 
             <!-- Task Table -->
-            <div id="taskTableContainer" class="hidden">
+            <div class="taskTableContainer" class="hidden">
+                <h5 class="mb-3">
+                    <i class="fa-solid fa-user me-2"></i>
+                    <span id="usernameDisplay">Welcome, {{ username }}</span>
+                </h5>
                 <h4 class="mb-3"><i class="fa-solid fa-list-check me-2"></i>Your Tasks</h4>
                 <div class="table-responsive" style="max-height: 500px; overflow-y: auto;">
-                    <table class="table table-bordered table-hover">
+                    <table id="tasktable" class="table table-bordered table-hover">
                         <thead class="table-light sticky-top">
                             <tr>
                                 <th><i class="fa-solid fa-tasks me-1"></i>Task</th>
-                                <th><i class="fa-solid fa-align-left me-1"></i>Description</th>
+                                
                                 <th><i class="fa-solid fa-calendar-days me-1"></i>Due Date</th>
-                                <th><i class="fa-solid fa-check-double me-1"></i>Status</th>
                                 <th><i class="fa-solid fa-arrow-up me-1"></i>Priority</th>
+                                <th><i class="fa-solid fa-check-double me-1"></i>Status</th>
                             </tr>
                         </thead>
                         <tbody>
                             {% for task in tasks %}
                             <tr>
                                 <td>{{ task.Task }}</td>
-                                <td>{{ task.Description }}</td>
                                 <td>{{ task.Due_date }}</td>
-                                <td contenteditable="true">{{ task.Status }}</td>
                                 <td contenteditable="true">{{ task.Priority }}</td>
+                                <td contenteditable="true" type="check-box">{{ task.Status }}</td>
+                                
                             </tr>
                             {% endfor %}
                         </tbody>
@@ -79,7 +85,9 @@
     </div>
 </div>
 
-<script src="{{url_for('static', filename='js/dashboard.js')}}"></script>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="/static/js/dashboard.js"></script>
+
 
 </body>
 </html>

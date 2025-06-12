@@ -1,34 +1,5 @@
--- Step 1: Delete from combined_alarm_defect_details
-DELETE FROM combined_alarm_defect_details
-WHERE alarm_id IN (
-    SELECT alarm_id FROM alarm_status WHERE roll_id IN (
-        SELECT roll_id FROM roll_details WHERE DATE(roll_end_date) <= '2025-04-15'
-    )
-)
-OR defect_id IN (
-    SELECT defect_id FROM defect_details WHERE roll_id IN (
-        SELECT roll_id FROM roll_details WHERE DATE(roll_end_date) <= '2025-04-15'
-    )
-);
-
--- Step 2: Delete from alarm_status
-DELETE FROM alarm_status
-WHERE roll_id IN (
-    SELECT roll_id FROM roll_details WHERE DATE(roll_end_date) <= '2025-04-15'
-);
-
--- Step 3: Delete from defect_details
-DELETE FROM defect_details
-WHERE roll_id IN (
-    SELECT roll_id FROM roll_details WHERE DATE(roll_end_date) <= '2025-04-15'
-);
-
--- Step 4: Delete from rotation_details
-DELETE FROM rotation_details
-WHERE roll_id IN (
-    SELECT roll_id FROM roll_details WHERE DATE(roll_end_date) <= '2025-04-15'
-);
-
--- Step 5: Delete from roll_details
-DELETE FROM roll_details
-WHERE DATE(roll_end_date) <= '2025-04-15'
+<div id="spinner" style="display: none;" class="spinner-wrapper">
+                <i class="fa fa-spinner fa-spin fa-3x fa-fw text-light"></i>
+                <div class="mt-2 text-white">Lodaing Tasks...</div>
+                <span class="visually-hidden">Loading...</span>
+            </div>
