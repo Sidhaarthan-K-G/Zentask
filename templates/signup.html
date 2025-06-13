@@ -13,20 +13,9 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 </head>
 <body>
-<div class="message">
-    <div class="message">
-        {% with messages = get_flashed_messages() %}
-    {% if messages %}
-        <div class="alert alert-info" role="alert" >
-        {% for message in messages %}
-            {{ message }}
-        {% endfor %}
-        </div>
-    {% endif %}
-    {% endwith %}
-</div>
+<div id="flashMessageContainer" style="position: fixed; top: 1rem; right: 1rem; z-index: 9999; display: flex; flex-direction: column; gap: 0.5rem;"></div>
 
-</div>
+
 <div class="d-flex flex-column align-items-center justify-content-center min-vh-100">
     <img src="{{ url_for('static', filename='Zentask.jpg') }}" alt="logo" width="64" class="mb-3">
 
@@ -60,6 +49,14 @@
 </div>
 
 
+<script src="static/js/signup.js"></script>
+<script>
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% for category, message in messages %}
+            showFlashMessage({{ message|tojson }}, "{{ category }}");
+        {% endfor %}
+    {% endwith %}
+</script>
 
 </div>
 </body>

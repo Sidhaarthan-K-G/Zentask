@@ -1,5 +1,152 @@
-<div id="spinner" style="display: none;" class="spinner-wrapper">
-                <i class="fa fa-spinner fa-spin fa-3x fa-fw text-light"></i>
-                <div class="mt-2 text-white">Lodaing Tasks...</div>
-                <span class="visually-hidden">Loading...</span>
-            </div>
+from flask import Flask
+from flask import render_template
+from flask import request
+from flask import redirect
+from flask import url_for
+from flask import flash,jsonify
+from flask import session
+from src.db import Execute
+
+app=Flask(__name__)
+app.secret_key = 'your-secret-key'
+@app.before_request
+def create():
+    try:
+        e=Execute()
+        e.login_table()
+        e.signup_table()
+        e.task_table()
+    except Exception as e:
+        print("table not created")
+    
+@app.route("/")
+def home():
+    return render_template("home.html")
+@app.route("/login", methods=["GET", "POST"])
+def login():
+    try:
+        if request.method == "POST":
+            data = {
+                "email": request.form.get("email").strip().lower(),
+                "password": request.form.get("password")
+            }
+            e = Execute()
+            user = e.verify_login(data["email"], data["password"])
+            if user:
+                # Set session variables
+                session["user_id"] = user["signup_id"]
+                session["email"] = user["email"]
+                
+                e.login_values(data)
+                return redirect(url_for("dashboard", user=user["username"]))
+            else:
+                
+                return redirect(url_for("login"))
+        return render_template("login.html")
+    except Exception as e:
+        print("Login error:", e)
+        
+        return render_template("login.html")
+
+
+@app.route('/signup', methods=["GET", "POST"])
+def signup():
+    try:
+        if request.method == "POST":
+            data = {
+                "name": request.form.get("name").strip(),
+                "email": request.form.get("email").strip().lower(),
+                "username": request.form.get("username").strip().lower(),
+                "password": request.form.get("password")
+            }
+
+            e = Execute()
+            existing_user = e.verify_signup(data["username"], data["email"])
+
+            if existing_user:
+                flash("User already exists. Try a different username or email.")
+                return redirect(url_for("signup"))
+
+            # Insert new user
+            e.signup_values(data)
+            
+            return redirect(url_for("dashboard", user=data["email"]))
+        
+        return render_template("signup.html")
+    except Exception as e:
+        print("Signup error:", e)
+        flash("An error occurred during signup. Please try again.")
+        return render_template("signup.html")
+    
+    
+    
+@app.route("/dashboard")
+def dashboard():
+    try:
+        if "email" not in session:
+            flash("Please log in to view dashboard")
+            return redirect(url_for("login"))
+        e = Execute()
+        user_data = e.get_user_by_email(session["email"])  # You'll add this method
+        username = user_data.get("username") if user_data else "User"
+
+        return render_template("dashboard.html", username=username)
+    except Exception as e:
+        print("Error loading dashboard:", e)
+        flash("Error loading tasks. Please try again.")
+        return redirect(url_for("login"))
+    
+@app.route("/api/get_tasks",methods=["GET"])
+def get_tasks():
+    try:
+        if "email" not in session:
+            return jsonify({"error":"Unauthorized"}),401
+        e=Execute()
+        tasks=e.get_tasks(session["email"])
+        
+        return jsonify({"tasks":tasks})
+    except Exception as e:
+        print("Error fetching tasks:",e)
+        return[]
+    
+@app.route("/new_task",methods=["POST","GET"])
+def new_tasks():
+    try:
+        if "email" not in session:
+            
+            return redirect(url_for("login"))
+        if request.method == "POST":
+            data={
+                "task":request.form.get("task").strip(),
+                "date":request.form.get("date").strip(),
+                "priority":request.form.get("priority").strip(),
+                "email":session["email"]
+            }
+            e=Execute()
+            e.insert_task(data)
+            return redirect(url_for("dashboard"))
+        return render_template("new_task.html")
+    except Exception as e:
+        print("Task not added:",e)
+        return redirect(url_for("new_task"))
+
+@app.route("/api/update_tasks",methods=["POST"])
+def update_tasks():
+    try:
+        tasks=request.get_json()
+        e=Execute()
+        for i in tasks:
+            e.update_tasks(i)
+        return jsonify({"message":"Task updated"}),200
+    except Exception as e:
+        print("Status not updated",e)
+        return jsonify({"error":"failed"}),500
+    
+
+@app.route("/logout")
+def logout():
+    session.clear()
+    return render_template("login.html")
+
+if __name__=="__main__":
+    app.run(debug=True)

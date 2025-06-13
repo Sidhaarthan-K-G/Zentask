@@ -1,40 +1,3 @@
-document.addEventListener('DOMContentLoaded', function () {
-    // 🔹 Set today's date as minimum
-    const dateInput = document.getElementById('date');
-    const today = new Date().toISOString().split('T')[0];
-    dateInput.setAttribute('min', today);
-
-    // 🔹 Handle form submission via AJAX
-    const taskForm = $('#taskForm');
-    if (taskForm.length) {
-        taskForm.on('submit', function (e) {
-            e.preventDefault();
-
-            const formData = new FormData(this);
-
-            $.ajax({
-                url: '/new_task',
-                method: 'POST',
-                data: formData,
-                processData: false,
-                contentType: false,
-                success: function (response) {
-                    showFlashMessage("Task added successfully!", "success");
-
-                    // ⏳ Wait for message to finish before redirecting
-                    setTimeout(() => {
-                        window.location.href = "/dashboard";
-                    }, 4500);
-                },
-                error: function () {
-                    showFlashMessage("Failed to add task!", "error");
-                }
-            });
-        });
-    }
-});
-
-// 🔹 Show toast flash message
 function getToastContainer() {
     let container = document.getElementById("flashMessageContainer");
     if (!container) {
@@ -47,7 +10,7 @@ function getToastContainer() {
             zIndex: 9999,
             display: "flex",
             flexDirection: "column",
-            gap: "10px",
+            gap: "0.5rem"
         });
         document.body.appendChild(container);
     }
@@ -59,8 +22,8 @@ function showFlashMessage(message, type = "success") {
     const flashBox = document.createElement("div");
     flashBox.className = `toast-message toast-${type}`;
     Object.assign(flashBox.style, {
-        backgroundColor: type === "success" ? "#0b6623" : "#b32d2e",
-        color: "white",
+        backgroundColor: type === "success" ? "#d4edda" : "#f8d7da",
+        color: type === "success" ? "#155724" : "#721c24",
         padding: "12px 18px",
         borderRadius: "6px",
         boxShadow: "0 3px 8px rgba(0,0,0,0.15)",
@@ -76,7 +39,10 @@ function showFlashMessage(message, type = "success") {
     });
 
     flashBox.innerHTML = `
-        <span>${message}</span>
+        <span>
+            <i class="fa-solid ${type === "success" ? "fa-check-circle" : "fa-exclamation-circle"} me-2"></i>
+            ${message}
+        </span>
         <span style="margin-left: 15px; font-weight: bold; user-select:none;">✖</span>
     `;
 
@@ -87,7 +53,6 @@ function showFlashMessage(message, type = "success") {
     };
 
     container.appendChild(flashBox);
-
     requestAnimationFrame(() => {
         flashBox.style.opacity = "1";
         flashBox.style.transform = "translateX(0)";

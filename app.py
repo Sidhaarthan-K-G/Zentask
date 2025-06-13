@@ -27,27 +27,28 @@ def login():
     try:
         if request.method == "POST":
             data = {
-                "email": request.form.get("email").strip().lower(),
-                "password": request.form.get("password")
+                "email": request.form.get("email", "").strip().lower(),
+                "password": request.form.get("password", "")
             }
+
             e = Execute()
             user = e.verify_login(data["email"], data["password"])
+
             if user:
-                # Set session variables
                 session["user_id"] = user["signup_id"]
                 session["email"] = user["email"]
-                flash("Login successful!")
                 e.login_values(data)
                 return redirect(url_for("dashboard", user=user["username"]))
             else:
-                flash("Invalid email or password.")
+                flash("Invalid email or password", "error")  # 🔴 Show error
                 return redirect(url_for("login"))
-        return render_template("login.html")
-    except Exception as e:
-        print("Login error:", e)
-        flash("An error occurred during login. Please try again.")
+
         return render_template("login.html")
 
+    except Exception as e:
+        print("Login error:", e)
+        flash("Something went wrong during login. Please try again.", "error")  # 🔴 Show exception flash
+        return render_template("login.html")
 
 @app.route('/signup', methods=["GET", "POST"])
 def signup():
@@ -64,19 +65,27 @@ def signup():
             existing_user = e.verify_signup(data["username"], data["email"])
 
             if existing_user:
-                flash("User already exists. Try a different username or email.")
+                flash("User already exists. Try a different username or email.", "error")
                 return redirect(url_for("signup"))
 
-            # Insert new user
+            # ✅ Add user to DB
             e.signup_values(data)
-            
-            return redirect(url_for("dashboard", user=data["email"]))
-        
+
+            # ✅ Fetch the user back to get their signup_id
+            user = e.verify_login(data["email"], data["password"])
+            if user:
+                session["user_id"] = user["signup_id"]
+                session["email"] = user["email"]
+
+            return redirect(url_for("dashboard"))
+
         return render_template("signup.html")
     except Exception as e:
         print("Signup error:", e)
-        flash("An error occurred during signup. Please try again.")
+        flash("An error occurred during signup. Please try again.", "error")
         return render_template("signup.html")
+
+
     
     
     
@@ -103,7 +112,7 @@ def get_tasks():
             return jsonify({"error":"Unauthorized"}),401
         e=Execute()
         tasks=e.get_tasks(session["email"])
-        print(tasks)
+        
         return jsonify({"tasks":tasks})
     except Exception as e:
         print("Error fetching tasks:",e)
@@ -113,7 +122,7 @@ def get_tasks():
 def new_tasks():
     try:
         if "email" not in session:
-            flash("Please log in to add a task.")
+            
             return redirect(url_for("login"))
         if request.method == "POST":
             data={
@@ -128,12 +137,45 @@ def new_tasks():
         return render_template("new_task.html")
     except Exception as e:
         print("Task not added:",e)
-        flash("An error occurred during adding the task. Please try again.")
         return redirect(url_for("new_task"))
+
+@app.route("/api/update_tasks",methods=["POST"])
+def update_tasks():
+    try:
+        tasks=request.get_json()
+        e=Execute()
+        for i in tasks:
+            e.update_tasks(i)
+        return jsonify({"message":"Task updated"}),200
+    except Exception as e:
+        print("Status not updated",e)
+        return jsonify({"error":"failed"}),500
+    
+
+@app.route("/api/delete_tasks", methods=["POST"])
+def delete_tasks():
+    try:
+        if "email" not in session:
+            return redirect(url_for("login"))
+
+        data = request.get_json()
+        if not data or "task_id" not in data:
+            return jsonify({"error": "Invalid request"}), 400
+
+        task_id = data["task_id"]
+        e = Execute()
+        success = e.delete_by_id(task_id)
+        if success:
+            return jsonify({"message": "Task deleted successfully"}), 200
+        else:
+            return jsonify({"error": "Task not found or could not be deleted"}), 404
+    except Exception as e:
+        print("Unable to delete task:", e)
+        return jsonify({"error": "Internal server error"}), 500
+
 @app.route("/logout")
 def logout():
     session.clear()
-    flash("You have been logged out.")
     return render_template("login.html")
 
 if __name__=="__main__":

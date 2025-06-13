@@ -80,15 +80,20 @@ class Execute:
                     """)
         except Exception as e:
             print("table not created")
-    def signup_values(self,data):
+    def signup_values(self, data):
+        cur = None
         try:
-            self.insert("""
-                insert into signup_details(
-                    name,email,username,password)
-                    values(%(name)s,%(email)s,%(username)s,%(password)s)""",data)
+            cur = self.conn.cursor()
+            cur.execute("""
+                INSERT INTO signup_details (name, email, username, password)
+                VALUES (%s, %s, %s, %s)
+            """, (data["name"], data["email"], data["username"], data["password"]))
+            self.conn.commit()  # ✅ commit after insert
         except Exception as e:
-            print("Data not inserted")
-            return []
+            print("Error in signup_values:", e)
+        finally:
+            if cur:
+                cur.close()
         
     def verify_login(self, email, password):
         cur = None
@@ -106,20 +111,22 @@ class Execute:
 
 
                 
-    def verify_signup(self,username,email):
-        cur=None
+    def verify_signup(self, username, email):
+        cur = None
         try:
-            cur=self.conn.cursor(dictionary=True)
+            cur = self.conn.cursor(dictionary=True)
             cur.execute("""
-                select * from signup_details where username=%s or email=%s """,(username,email))
-            exist=cur.fetchone()
-            return exist
+                SELECT * FROM signup_details
+                WHERE username = %s OR email = %s
+            """, (username, email))
+            return cur.fetchall()  # ✅ fetches result fully
         except Exception as e:
-            print("Not able to fetch data",e)
-            return []
+            print("Not able to fetch data", e)
+            return None  # better than empty list for clarity
         finally:
             if cur:
                 cur.close()
+
                 
     def task_table(self):
         try:
@@ -164,7 +171,6 @@ class Execute:
             cur=self.conn.cursor(dictionary=True)
             cur.execute("SELECT * FROM tasks WHERE Email = %s ORDER BY Status ASC", (email,))
             tasks=cur.fetchall()
-            print(tasks)
             return (tasks)
         except Exception as e:
             print("Error fetching tasks:", e)
@@ -172,8 +178,28 @@ class Execute:
         finally:
             if cur:
                 cur.close()
-                
     
+    def update_tasks(self,task):
+        cur=None
+        try:
+            cur=self.conn.cursor(dictionary=True)
+            cur.execute("update tasks set Status=%s where task=%s and email=%s",(task["Status"],task["task"],task["email"]))
+        except Exception as e:
+            print("Error updating the status:",e)
+            return []
+        
+    def delete_by_id(self, task_id):
+        cur = None
+        try:
+            cur = self.conn.cursor()
+            cur.execute("DELETE FROM tasks WHERE Task_id = %s", (task_id,))
+            return cur.rowcount > 0
+        except Exception as e:
+            print("Error deleting row", e)
+            return False
+
+        
+        
     def __del__(self):
         if self.conn:
             self.conn.close()
