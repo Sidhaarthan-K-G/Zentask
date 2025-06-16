@@ -1,88 +1,118 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <title>Zentask · Dashboard</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    
+
     <!-- Bootstrap -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    
+
     <!-- Custom CSS -->
     <link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 </head>
+
 <body>
 
-<!-- Navbar -->
-<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <!-- Navbar -->
+    <nav class="navbar">
+        <div class="container-fluid">
+            <a class="navbar-brand d-flex align-items-center" href="#">
+                <img src="{{ url_for('static', filename='images/Zentask.png') }}" alt="logo" class="logo-img">
+                
+            </a>
+            <div class="d-flex ms-auto">
+                <a href="/logout" class="btn btn-outline-light">Logout</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Layout -->
     <div class="container-fluid">
-        <a class="navbar-brand d-flex align-items-center" href="#">
-            <img src="{{ url_for('static', filename='Zentaskw.jpg') }}" alt="logo">
-            <div class="brand">Zentask</div>
-        </a>
-        <div class="d-flex ms-auto">
-            
-            <a href="/logout" class="btn btn-outline-danger">Logout</a>
-        </div>
-    </div>
-</nav>
-
-<!-- Layout -->
-<div class="container-fluid">
-    <div class="row">
-        <!-- Sidebar -->
-        <div class="col-md-2 bg-light vh-100 p-3">
-            <h6 class="text-muted">Menu</h6>
-            <ul class="nav flex-column">
-                <li class="nav-item"><a class="nav-link active" href="/dashboard"><i class="fa-solid fa-table-columns me-2"></i>Dashboard</a></li>
-                <li class="nav-item"><a class="nav-link" href="/new_task"><i class="fa-solid fa-plus me-2"></i>New Task</a></li>
-            </ul>
-        </div>
-
-        <!-- Main content -->
-        <div class="col-md-10 p-4">
-            <!-- Spinner -->
-            <div id="spinner" style="display: none;" class="spinner-wrapper">
-                <i class="fa fa-spinner fa-spin fa-3x fa-fw text-light"></i>
-                <div class="mt-2 text-white">Lodaing Tasks...</div>
-                <span class="visually-hidden">Loading...</span>
+        <div class="row">
+            <!-- Sidebar -->
+            <div class="col-md-2  vh-100 p-3 Sidebar">
+                
+                <ul class="nav flex-column">
+                    <li class="nav-item">
+                        <a class="nav-link active" href="/dashboard">
+                            <i class="fa-solid fa-table-columns me-2"></i>Dashboard
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/new_task">
+                            <i class="fa-solid fa-plus me-2"></i>New Task
+                        </a>
+                    </li>
+                </ul>
             </div>
 
-            <!-- Task Table -->
-            <div class="taskTableContainer" class="hidden">
-                <h5 class="mb-3">
-                    <i class="fa-solid fa-user me-2"></i>
-                    <span id="usernameDisplay">Welcome, {{ username }}</span>
-                </h5>
-                <h4 class="mb-3"><i class="fa-solid fa-list-check me-2"></i>Your Tasks</h4>
-                <div class="table-responsive" style="max-height: 500px; overflow-y: auto;">
-                    <table id="tasktable" class="table table-bordered table-hover">
-                        <thead class="table-light sticky-top">
-                            <tr>
-                                <th><i class="fa-solid fa-tasks me-1"></i>Task</th>
-                                
-                                <th><i class="fa-solid fa-calendar-days me-1"></i>Due Date</th>
-                                <th><i class="fa-solid fa-arrow-up me-1"></i>Priority</th>
-                                <th><i class="fa-solid fa-check-double me-1"></i>Status</th>
-                                <th><i class="fa-solid fa-trash-can me-1"></i>Remove task</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                        </tbody>
-                    </table>
-                    <button id="saveBtn" class="btn btn-primary">
-                        <i class="fa-solid fa-save "></i> <b>Save</b>
-                    </button>
+            <!-- Main content -->
+            <div class="col-md-10 p-4">
+                <!-- Spinner -->
+                <div id="spinner" style="display: none;" class="spinner-wrapper">
+                    <i class="fa fa-spinner fa-spin fa-3x fa-fw text-light"></i>
+                    <div class="mt-2 text-white">Loading Tasks...</div>
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+
+                <!-- Task Table -->
+                <div class="taskTableContainer" class="hidden">
+                    <h5 class="mb-3">
+                        <i class="fa-solid fa-user me-2"></i>
+                        <span id="usernameDisplay">Welcome, {{ username }}</span>
+                    </h5>
+                    <h4 class="mb-3">
+                        <i class="fa-solid fa-list-check me-2"></i>Your Tasks
+                    </h4>
+                    <div class="mb-3">
+                        <select id="statusfilter" class="form-select" aria-label="Filter tasks by status" style="width: 400px;">
+                            <option value="all">All</option>
+                            <option value="Not Done">
+                                Not Done <i class="fa-solid fa-hourglass-start text-secondary ms-2"></i>
+                            </option>
+                            <option value="In Progress">
+                                In Progress <i class="fa-solid fa-spinner text-warning ms-2"></i>
+                            </option>
+                            <option value="Done">
+                                Done <i class="fa-solid fa-check-circle text-success ms-2"></i>
+                            </option>
+                            <option value="Overdue">
+                                Overdue <i class="fa-solid fa-exclamation-circle text-danger ms-2"></i>
+                            </option>
+                        </select>
+                    </div>
+                    <div class="table-responsive" style="max-height: 500px; overflow-y: auto;">
+                        <table id="tasktable" class="table table-bordered table-hover">
+                            <thead class="table sticky-top">
+                                <tr>
+                                    <th><i class="fa-solid fa-tasks me-1"></i>Task</th>
+                                    <th><i class="fa-solid fa-calendar-days me-1"></i>Due Date</th>
+                                    <th><i class="fa-solid fa-arrow-up me-1"></i>Priority</th>
+                                    <th><i class="fa-solid fa-check-double me-1"></i>Status</th>
+                                    <th><i class="fa-solid fa-trash-can me-1"></i>Remove task</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                            </tbody>
+                        </table>
+                        <button id="saveBtn" class="btn">
+                            <i class="fa-solid fa-save"></i> <b>Save</b>
+                        </button>
+                    </div>
                 </div>
             </div>
-        </div>
+        </div><br>
+        <footer>
+            <p>&copy; 2025 Zentask, Inc.</p>
+        </footer>
     </div>
-</div>
 
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<script src="/static/js/dashboard.js"></script>
-
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="/static/js/dashboard.js"></script>
 
 </body>
+
 </html>

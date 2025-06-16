@@ -1,3 +1,8 @@
+    html,body{
+        height: 100%;
+        margin: 0;
+    }
+    
     body {
     min-height: 100vh;
     margin: 0;
@@ -6,17 +11,22 @@
     align-items: center;
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
     text-align: center;
+    background-image: url('../images/Zentaskbg.png');
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-position: center;
+    }
 
-    
+    .d-flex{
+        color: white;
     }
 
     .login-box {
-    width: 340px;
-    padding: 24px;
-    background-color: rgba(255, 255, 255, 0.9); /* translucent white */
-    border: 1px solid #d8dee4;
-    border-radius: 6px;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        color: white;
+        width: 340px;
+        padding: 24px;
+        border-radius: 6px;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.05);
     }
 
 
@@ -31,10 +41,11 @@
     }
 
     .btn-success {
-    background-color: #2ea44f;
-    border-color: #2ea44f;
+    background-color: #c51ddf;
+    border-color: #000000;
     font-weight: 600;
     font-size: 14px;
+    color: white;
     }
 
     .btn-success:hover {
@@ -45,31 +56,41 @@
     .small-link {
     font-size: 12px;
     text-decoration: none;
+    color:#c209da
     }
 
     .small-link:hover {
-    text-decoration: underline;
+    text-decoration: none;
     }
 
     .new-to-github {
     font-size: 13px;
-    color: #57606a;
+    color: white;
     }
 
     .new-to-github a {
-    color: #0969da;
+    color: #c209da;
     text-decoration: none;
     }
 
     .new-to-github a:hover {
-    text-decoration: underline;
+    text-decoration: none;
     }
-        img {
-    border-radius: 50%;      /* makes the image a perfect circle */
-    width: 64px;             /* or any fixed size */
-    height: 64px;            /* equal width and height */
-    object-fit: cover;       /* ensures the image covers the area without distortion */
-    }
+    .logo-link {
+    display: flex;
+    align-items: center;
+    text-decoration: none;
+    color: #f0f6fc;
+}
+
+.logo-img {
+    
+    width: 40%;
+    height: 32px;
+    border-radius: 4px;
+    margin-right: 8px;
+    margin-bottom: 10px;
+}
 .message p {
     background-color: #e0f0ff;
     color: #0a3c66;
@@ -85,3 +106,10 @@
     color:black;
 }
 
+footer {
+    margin-top: 150px;
+    padding: 1rem;
+    text-align: center;
+    color: white;
+    font-size: 0.9rem;
+}

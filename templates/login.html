@@ -19,11 +19,11 @@
     <!-- 🔹 Flash Message Container -->
     <div id="flashMessageContainer" style="position: fixed; top: 1rem; right: 1rem; z-index: 9999; display: flex; flex-direction: column; gap: 0.5rem;"></div>
 
-    <div class="d-flex flex-column align-items-center justify-content-center min-vh-100">
-        <img src="{{ url_for('static', filename='Zentask.jpg') }}" alt="logo" width="64" class="mb-3 rounded-circle">
+    <div class="d-flex flex-column align-items-center justify-content-center min-vh-100 login-background-wrapper">
+
+        <h1 class="text-center fs-5 mb-4">Sign in to <img src="{{ url_for('static', filename='images/Zentask.png') }}" alt="Zentask Logo" class="logo-img"></h1>
 
         <div class="login-box">
-        <h1 class="text-center fs-5 mb-4">Sign in to Zentask</h1>
 
         <form method="POST" action="/login">
             <div class="mb-3 input-group">
@@ -43,20 +43,24 @@
 
         <div class="new-to-github text-center mt-3">
         New to Zentask? <a href="{{ url_for('signup') }}">Create an account</a>
-        </div>
+        </div><br>
+        <footer>
+            <p>&copy; 2025 Zentask, Inc.</p>
+        </footer>
     </div>
-
+    
+    
     <!-- ✅ Correct Script Path (note the leading slash) -->
     <script src="{{ url_for('static', filename='js/login.js') }}"></script>
-
+    
     <!-- ✅ Flash Message Injection -->
     <script>
         {% with messages = get_flashed_messages(with_categories=true) %}
         {% for category, message in messages %}
-            showFlashMessage({{ message|tojson }}, "{{ category }}");
+        showFlashMessage({{ message|tojson }}, "{{ category }}");
         {% endfor %}
         {% endwith %}
     </script>
-
+    
 </body>
 </html>

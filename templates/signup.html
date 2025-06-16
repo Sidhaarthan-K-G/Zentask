@@ -17,10 +17,9 @@
 
 
 <div class="d-flex flex-column align-items-center justify-content-center min-vh-100">
-    <img src="{{ url_for('static', filename='Zentask.jpg') }}" alt="logo" width="64" class="mb-3">
+    <h1 class="text-center fs-5 mb-4">Create your <img src="{{ url_for('static', filename='images/Zentask.png') }}" alt="logo" width="64" class="logo-img"> account</h1>
 
     <div class="login-box">
-        <h1 class="text-center fs-5 mb-4">Create your Zentask account</h1>
 
         <form method="POST" action="/signup">
             <div class="mb-3 input-group">
@@ -45,7 +44,10 @@
 
     <div class="new-to-github text-center mt-3">
         Already have an account? <a href="{{ url_for('login') }}">Sign in</a>.
-    </div>
+    </div><br>
+    <footer>
+            <p>&copy; 2025 Zentask, Inc.</p>
+    </footer>
 </div>
 
 

@@ -1,14 +1,21 @@
+html,body{
+    height: 100%;
+    margin: 0;
+}
+
 body {
     margin: 0;
     font-family: 'Inter', sans-serif;
-    background-color: #f6f8fa;
-    color: #24292e;
+    color: white;
+    background-image: url('../images/Zentaskbg.png');
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-position: center;
 }
 
 /* Navbar GitHub-style */
 .navbar {
-    background-color: #161b22;
-    border-bottom: 1px solid #30363d;
+    margin-top: 30px;
     padding: 0.6rem 1rem;
     position: sticky;
     top: 0;
@@ -32,7 +39,8 @@ body {
 }
 
 .logo-img {
-    width: 32px;
+    
+    width: 100%;
     height: 32px;
     border-radius: 4px;
     margin-right: 8px;
@@ -68,7 +76,7 @@ body {
 .hero {
     text-align: center;
     padding: 5rem 1rem;
-    background: #ffffff;
+    
 }
 
 .hero h1 {
@@ -79,27 +87,30 @@ body {
 .hero p {
     font-size: 1.2rem;
     margin-bottom: 2rem;
-    color: #57606a;
+    color: white;
 }
 
 .cta {
-    background-color: #2ea44f;
+    background-color:#ac0eb8 ;
     color: white;
     padding: 0.75rem 2rem;
     border-radius: 0.5rem;
     text-decoration: none;
     font-weight: 600;
+    transition: background-color 0.3s ease, box-shadow 0.3s ease; /* ✅ add transition */
 }
 
+
 .cta:hover {
-    background-color: #22863a;
+    background-color: #ac0eb8;
+    box-shadow: 0 4px 12px rgba(255, 255, 255, 0.288); /* ✅ subtle shadow */
 }
 
 /* Footer */
 footer {
-    background-color: #f6f8fa;
+    margin-top: 200px;
     padding: 1rem;
     text-align: center;
-    color: #586069;
+    color: white;
     font-size: 0.9rem;
 }

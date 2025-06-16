@@ -20,12 +20,11 @@
 <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
     <div class="container-fluid">
         <a class="navbar-brand d-flex align-items-center" href="#">
-            <img src="{{ url_for('static', filename='Zentaskw.jpg') }}" alt="logo">
-            <div class="brand">Zentask</div>
+            <img src="{{ url_for('static', filename='images/Zentask.png') }}" alt="logo" class="logo-img">
+            
         </a>
         <div class="d-flex ms-auto">
-            
-            <a href="/logout" class="btn btn-outline-danger">Logout</a>
+            <a href="/logout" class="btn btn-outline-light">Logout</a>
         </div>
     </div>
 </nav>
@@ -34,8 +33,8 @@
 <div class="container-fluid">
     <div class="row">
         <!-- Sidebar -->
-        <div class="col-md-2 bg-light vh-100 p-3">
-            <h6 class="text-muted">Menu</h6>
+        <div class="col-md-2  vh-100 p-3 Sidebar">
+            
             <ul class="nav flex-column">
                 <li class="nav-item">
                     <a class="nav-link" href="/dashboard"><i class="fa-solid fa-table-columns me-2"></i>Dashboard</a>
@@ -76,7 +75,11 @@
                 </form>
             </div>
         </div>
-    </div>
+    </div><br>
+    <footer>
+            <p>&copy; 2025 Zentask, Inc.</p>
+    </footer>
+</div>
 </div>
 
 <script src="{{url_for('static',filename='js/new_task.js')}}"></script>

@@ -137,10 +137,11 @@ $(document).ready(function () {
                                             <option value="Not Done" ${row.Status === "Not Done" ? "selected" : ""}>Not Done</option>
                                             <option value="In Progress" ${row.Status === "In Progress" ? "selected" : ""}>In Progress</option>
                                             <option value="Done" ${row.Status === "Done" ? "selected" : ""}>Done</option>
+                                            <option value="Overdue" ${row.status === "Overdue" ? "selected" : ""}>Overdue</optio
                                         </select>
                                     </td>
                                     <td class="text-center">
-                                        <button class="btn btn-sm btn-outline-danger delete-task-btn" title="Delete Task">
+                                        <button class="btn btn-sm btn-bg-danger btn-light delete-task-btn" title="Delete Task">
                                             <i class="fa-solid fa-trash-can"></i>
                                         </button>
                                     </td>
@@ -160,7 +161,7 @@ $(document).ready(function () {
                             <tr><td colspan="5" class="text-center text-muted">No tasks found.</td></tr>
                         `);
                     }
-                }, 2500); // Simulated delay
+                }, 2000); // Simulated delay
             },
             error: function () {
                 clearTimeout(spinnerTimeout);
