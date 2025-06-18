@@ -1,5 +1,5 @@
 $(document).ready(function () {
-    // 🔹 Toast container utility
+    // 🔹 Toast utility
     function getToastContainer() {
         let container = document.getElementById("flashMessageContainer");
         if (!container) {
@@ -19,7 +19,6 @@ $(document).ready(function () {
         return container;
     }
 
-    // 🔹 Show flash message (toast)
     function showFlashMessage(message, type = "success") {
         const container = getToastContainer();
         const flashBox = document.createElement("div");
@@ -71,7 +70,20 @@ $(document).ready(function () {
         }, 4000);
     }
 
-    // 🔹 Show spinner in table
+    // 🔹 Format dropdown options
+    function formatStatusOption(state) {
+        if (!state.id) return state.text;
+        const icons = {
+            "Not Done": "fa-hourglass-start text-secondary",
+            "In Progress": "fa-spinner text-warning",
+            "Done": "fa-check-circle text-success",
+            "Overdue": "fa-clock text-danger"
+        };
+        const icon = icons[state.text.trim()] || "fa-circle";
+        return $(`<span><i class="fas ${icon} me-2"></i>${state.text}</span>`);
+    }
+
+    // 🔹 Spinner utility
     function showSpinnerInTable(tableSelector, colspan) {
         const tbody = $(`${tableSelector} tbody`);
         tbody.html(`
@@ -88,105 +100,150 @@ $(document).ready(function () {
         `);
     }
 
-    // 🔹 Clear table body
     function clearTableBody(tableSelector) {
         $(`${tableSelector} tbody`).empty();
     }
 
-    // 🔹 Format dropdown options with Font Awesome icons
-    function formatStatusOption(state) {
-        if (!state.id) return state.text;
+    // 🔹 Mark Overdue Tasks
+    function markOverdueTasks() {
+        const rows = document.querySelectorAll("#tasktable tbody tr");
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
 
-        const icons = {
-            "Not Done": "fa-hourglass-start text-secondary",
-            "In Progress": "fa-spinner text-warning",
-            "Done": "fa-check-circle text-success"
-        };
+        rows.forEach(row => {
+            const dueDateCell = row.querySelector("td:nth-child(2)");
+            const taskId = row.dataset.taskid;
+            if (!dueDateCell || !taskId) return;
 
-        const icon = icons[state.text.trim()] || "fa-circle";
-        return $(`<span><i class="fas ${icon} me-2"></i>${state.text}</span>`);
+            const dueDateStr = dueDateCell.textContent.trim();
+            const dueDate = new Date(dueDateStr);
+            dueDate.setHours(0, 0, 0, 0);
+
+            const statusSelect = row.querySelector("td:nth-child(4) select");
+            const currentStatus = statusSelect ? statusSelect.value.trim() : "Overdue";
+
+            if (dueDate < today && currentStatus !== "Overdue" && currentStatus !== "Done") {
+                if (statusSelect) {
+                    statusSelect.value = "Overdue";
+                    $(statusSelect).trigger("change.select2");
+                }
+
+                $(row).find("select, input, textarea, button").each(function () {
+                    const isDeleteButton = $(this).hasClass("delete-task-btn") || $(this).find(".fa-trash-can").length > 0;
+                    if (!isDeleteButton) {
+                        $(this).prop("disabled", true);
+                    }
+                });
+
+                $.ajax({
+                    url: '/api/update_task_status',
+                    method: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify({ task_id: taskId, status: "Overdue" }),
+                    success: () => console.log(`Task ${taskId} marked as overdue`),
+                    error: () => console.error(`Failed to update task ${taskId} as overdue`)
+                });
+            }
+        });
     }
 
-    // 🔹 Fetch tasks from API and render table
-    function fetchTasks() {
+    // 🔹 Fetch tasks
+    async function fetchTasks() {
         const tableSelector = "#tasktable";
         let spinnerTimeout = setTimeout(() => {
             showSpinnerInTable(tableSelector, 5);
         }, 300);
 
-        $.ajax({
-            url: "/api/get_tasks",
-            method: "GET",
-            dataType: "json",
-            success: function (data) {
-                clearTimeout(spinnerTimeout);
-                showSpinnerInTable(tableSelector, 5);
+        try {
+            const data = await $.ajax({
+                url: "/api/get_tasks",
+                method: "GET",
+                dataType: "json"
+            });
 
-                setTimeout(() => {
-                    clearTableBody(tableSelector);
+            clearTimeout(spinnerTimeout);
+            showSpinnerInTable(tableSelector, 5);
 
-                    if (data && data.tasks && data.tasks.length > 0) {
-                        data.tasks.forEach(function (row) {
-                            const tr = `
-                                <tr data-email="${row.email}" data-taskid="${row.Task_id}">
-                                    <td>${row.Task}</td>
-                                    <td>${row.Due_date}</td>
-                                    <td>${row.Priority}</td>
-                                    <td>
-                                        <select class="status-select form-select" data-taskid="${row.Task_id}">
-                                            <option value="Not Done" ${row.Status === "Not Done" ? "selected" : ""}>Not Done</option>
-                                            <option value="In Progress" ${row.Status === "In Progress" ? "selected" : ""}>In Progress</option>
-                                            <option value="Done" ${row.Status === "Done" ? "selected" : ""}>Done</option>
-                                            <option value="Overdue" ${row.status === "Overdue" ? "selected" : ""}>Overdue</optio
-                                        </select>
-                                    </td>
-                                    <td class="text-center">
-                                        <button class="btn btn-sm btn-bg-danger btn-light delete-task-btn" title="Delete Task">
-                                            <i class="fa-solid fa-trash-can"></i>
-                                        </button>
-                                    </td>
-                                </tr>`;
-                            $(`${tableSelector} tbody`).append(tr);
-                        });
+            await new Promise(resolve => setTimeout(resolve, 2000));
+            clearTableBody(tableSelector);
 
-                        $('.status-select').select2({
-                            width: '100%',
-                            templateResult: formatStatusOption,
-                            templateSelection: formatStatusOption,
-                            minimumResultsForSearch: Infinity
-                        });
+            if (data && data.tasks && data.tasks.length > 0) {
+                data.tasks.forEach(row => {
+                    let statusHtml = "";
 
+                    if (row.Status === "Overdue") {
+                        statusHtml = `
+                            <div class="form-select readonly-dropdown">
+                                <i class="fas fa-clock text-danger me-2"></i> Overdue
+                            </div>
+                        `;
                     } else {
-                        $(`${tableSelector} tbody`).html(`
-                            <tr><td colspan="5" class="text-center text-muted">No tasks found.</td></tr>
-                        `);
+                        statusHtml = `
+                            <select class="status-select form-select" data-taskid="${row.Task_id}">
+                                <option value="Not Done" ${row.Status === "Not Done" ? "selected" : ""}>Not Done</option>
+                                <option value="In Progress" ${row.Status === "In Progress" ? "selected" : ""}>In Progress</option>
+                                <option value="Done" ${row.Status === "Done" ? "selected" : ""}>Done</option>
+                                <option value="Overdue" ${row.Status === "Overdue" ? "selected" : ""}>Overdue</option>
+                            </select>
+                        `;
                     }
-                }, 2000); // Simulated delay
-            },
-            error: function () {
-                clearTimeout(spinnerTimeout);
+
+                    const tr = `
+                        <tr data-email="${row.email}" data-taskid="${row.Task_id}">
+                            <td>${row.Task}</td>
+                            <td>${row.Due_date}</td>
+                            <td>${row.Priority}</td>
+                            <td>${statusHtml}</td>
+                            <td class="text-center">
+                                <button class="btn btn-sm btn-bg-danger btn-light delete-task-btn" title="Delete Task">
+                                    <i class="fa-solid fa-trash-can"></i>
+                                </button>
+                            </td>
+                        </tr>`;
+                    $(`${tableSelector} tbody`).append(tr);
+                });
+
+                $('.status-select').select2({
+                    width: '100%',
+                    templateResult: formatStatusOption,
+                    templateSelection: formatStatusOption,
+                    minimumResultsForSearch: Infinity
+                });
+            } else {
                 $(`${tableSelector} tbody`).html(`
-                    <tr><td colspan="5" class="text-center text-danger">Failed to load tasks.</td></tr>
+                    <tr><td colspan="5" class="text-center text-muted">No tasks found.</td></tr>
                 `);
             }
-        });
+
+            markOverdueTasks();
+
+        } catch (err) {
+            clearTimeout(spinnerTimeout);
+            $(`${tableSelector} tbody`).html(`
+                <tr><td colspan="5" class="text-center text-danger">Failed to load tasks.</td></tr>
+            `);
+        }
     }
 
-    // 🔹 Update task status
+    // 🔹 Filter by status
+    $("#statusfilter").on("change", function () {
+        const selectedStatus = $(this).val().toLowerCase();
+        $("#tasktable tbody tr").each(function () {
+            const statusText = $(this).find(".status-select").val()?.toLowerCase() || "overdue";
+            $(this).toggle(selectedStatus === "all" || statusText === selectedStatus);
+        });
+    });
+
+    // 🔹 Update tasks
     function update() {
         const updates = [];
-
         $('#tasktable tbody tr').each(function () {
             const task = $(this).find('td:eq(0)').text().trim();
             const status = $(this).find('select.status-select').val();
             const email = $(this).data("email");
 
             if (task && status) {
-                updates.push({
-                    task: task,
-                    Status: status,
-                    email: email
-                });
+                updates.push({ task: task, Status: status, email: email });
             }
         });
 
@@ -200,13 +257,11 @@ $(document).ready(function () {
             method: "POST",
             contentType: "application/json",
             data: JSON.stringify(updates),
-            success: function () {
+            success: () => {
                 showFlashMessage("Tasks updated successfully", "success");
                 fetchTasks();
             },
-            error: function () {
-                showFlashMessage("Status update failed", "error");
-            }
+            error: () => showFlashMessage("Status update failed", "error")
         });
     }
 
@@ -237,11 +292,42 @@ $(document).ready(function () {
         }
     });
 
-    // 🔹 Save button handler
+    // 🔹 Save button
     $("#saveBtn").on("click", function () {
         update();
     });
 
-    // 🔹 Initial fetch
+    // 🔹 Add task form
+    const taskForm = $('#taskForm');
+    if (taskForm.length) {
+        taskForm.on('submit', function (e) {
+            e.preventDefault();
+            const formData = new FormData(this);
+            const rawDate = formData.get("date");
+            if (rawDate) {
+                const date = new Date(rawDate);
+                date.setHours(0, 0, 0, 0);
+                const normalized = date.toISOString().split("T")[0];
+                formData.set("date", normalized);
+            }
+
+            $.ajax({
+                url: '/new_task',
+                method: 'POST',
+                data: formData,
+                processData: false,
+                contentType: false,
+                success: function () {
+                    showFlashMessage("Task added successfully!", "success");
+                    setTimeout(() => window.location.href = "/dashboard", 4500);
+                },
+                error: function () {
+                    showFlashMessage("Failed to add task!", "error");
+                }
+            });
+        });
+    }
+
+    // 🔹 Initial call
     fetchTasks();
 });

@@ -188,6 +188,21 @@ class Execute:
             print("Error updating the status:",e)
             return []
         
+    def update_status_by_id(self, task_id, new_status):
+        cur = None
+        try:
+            cur = self.conn.cursor()
+            cur.execute("UPDATE tasks SET Status = %s WHERE Task_id = %s", (new_status, task_id))
+            self.conn.commit()
+            return True
+        except Exception as e:
+            print("Error updating task status by ID:", e)
+            return False
+        finally:
+            if cur:
+                cur.close()
+
+        
     def delete_by_id(self, task_id):
         cur = None
         try:

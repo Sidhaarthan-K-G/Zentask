@@ -172,6 +172,28 @@ def delete_tasks():
     except Exception as e:
         print("Unable to delete task:", e)
         return jsonify({"error": "Internal server error"}), 500
+    
+@app.route("/api/update_task_status", methods=["POST"])
+def update_task_status():
+    try:
+        if "email" not in session:
+            return jsonify({"error": "Unauthorized"}), 401
+
+        data = request.get_json()
+        task_id = data.get("task_id")
+        new_status = data.get("status")
+
+        if not task_id or not new_status:
+            return jsonify({"error": "Missing task_id or status"}), 400
+
+        e = Execute()
+        e.update_status_by_id(task_id, new_status)
+        return jsonify({"message": "Task status updated"}), 200
+
+    except Exception as e:
+        print("Error updating task status:", e)
+        return jsonify({"error": "Internal server error"}), 500
+
 
 @app.route("/logout")
 def logout():
