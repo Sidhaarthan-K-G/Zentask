@@ -70,7 +70,6 @@ $(document).ready(function () {
         }, 4000);
     }
 
-    // 🔹 Format dropdown options
     function formatStatusOption(state) {
         if (!state.id) return state.text;
         const icons = {
@@ -83,17 +82,16 @@ $(document).ready(function () {
         return $(`<span><i class="fas ${icon} me-2"></i>${state.text}</span>`);
     }
 
-    // 🔹 Spinner utility
     function showSpinnerInTable(tableSelector, colspan) {
         const tbody = $(`${tableSelector} tbody`);
         tbody.html(`
             <tr>
-                <td colspan="${colspan}" class="text-center py-4">
-                    <div class="spinner-wrapper">
-                        <div class="spinner-border text-dark" role="status">
+                <td colspan="${colspan}" style="text-align:center; padding: 2rem;">
+                    <div style="color: white;">
+                        <div class="spinner-border" style="color: white;" role="status">
                             <span class="visually-hidden">Loading...</span>
                         </div>
-                        <div class="mt-2 text-dark">Loading data...</div>
+                        <div style="margin-top: 1rem;">Loading data...</div>
                     </div>
                 </td>
             </tr>
@@ -104,7 +102,6 @@ $(document).ready(function () {
         $(`${tableSelector} tbody`).empty();
     }
 
-    // 🔹 Mark Overdue Tasks
     function markOverdueTasks() {
         const rows = document.querySelectorAll("#tasktable tbody tr");
         const today = new Date();
@@ -147,7 +144,6 @@ $(document).ready(function () {
         });
     }
 
-    // 🔹 Fetch tasks
     async function fetchTasks() {
         const tableSelector = "#tasktable";
         let spinnerTimeout = setTimeout(() => {
@@ -167,7 +163,7 @@ $(document).ready(function () {
             await new Promise(resolve => setTimeout(resolve, 2000));
             clearTableBody(tableSelector);
 
-            if (data && data.tasks && data.tasks.length > 0) {
+            if (data?.tasks?.length > 0) {
                 data.tasks.forEach(row => {
                     let statusHtml = "";
 
@@ -179,7 +175,7 @@ $(document).ready(function () {
                         `;
                     } else {
                         statusHtml = `
-                            <select class="status-select form-select" data-taskid="${row.Task_id}">
+                            <select class="status-select" data-taskid="${row.Task_id}">
                                 <option value="Not Done" ${row.Status === "Not Done" ? "selected" : ""}>Not Done</option>
                                 <option value="In Progress" ${row.Status === "In Progress" ? "selected" : ""}>In Progress</option>
                                 <option value="Done" ${row.Status === "Done" ? "selected" : ""}>Done</option>
@@ -194,8 +190,8 @@ $(document).ready(function () {
                             <td>${row.Due_date}</td>
                             <td>${row.Priority}</td>
                             <td>${statusHtml}</td>
-                            <td class="text-center">
-                                <button class="btn btn-sm btn-bg-danger btn-light delete-task-btn" title="Delete Task">
+                            <td style="text-align:center;">
+                                <button class="delete-task-btn custom-delete-btn" title="Delete Task">
                                     <i class="fa-solid fa-trash-can"></i>
                                 </button>
                             </td>
@@ -211,7 +207,7 @@ $(document).ready(function () {
                 });
             } else {
                 $(`${tableSelector} tbody`).html(`
-                    <tr><td colspan="5" class="text-center text-muted">No tasks found.</td></tr>
+                    <tr><td colspan="5" style="text-align:center; color:#ccc;">No tasks found.</td></tr>
                 `);
             }
 
@@ -220,12 +216,11 @@ $(document).ready(function () {
         } catch (err) {
             clearTimeout(spinnerTimeout);
             $(`${tableSelector} tbody`).html(`
-                <tr><td colspan="5" class="text-center text-danger">Failed to load tasks.</td></tr>
+                <tr><td colspan="5" style="text-align:center; color:red;">Failed to load tasks.</td></tr>
             `);
         }
     }
 
-    // 🔹 Filter by status
     $("#statusfilter").on("change", function () {
         const selectedStatus = $(this).val().toLowerCase();
         $("#tasktable tbody tr").each(function () {
@@ -234,7 +229,6 @@ $(document).ready(function () {
         });
     });
 
-    // 🔹 Update tasks
     function update() {
         const updates = [];
         $('#tasktable tbody tr').each(function () {
@@ -265,7 +259,6 @@ $(document).ready(function () {
         });
     }
 
-    // 🔹 Delete task
     $(document).on("click", ".delete-task-btn", function () {
         const row = $(this).closest("tr");
         const taskId = row.attr("data-taskid");
@@ -292,12 +285,10 @@ $(document).ready(function () {
         }
     });
 
-    // 🔹 Save button
     $("#saveBtn").on("click", function () {
         update();
     });
 
-    // 🔹 Add task form
     const taskForm = $('#taskForm');
     if (taskForm.length) {
         taskForm.on('submit', function (e) {
@@ -328,6 +319,5 @@ $(document).ready(function () {
         });
     }
 
-    // 🔹 Initial call
     fetchTasks();
 });
