@@ -11,12 +11,11 @@
         <div class="nav-container">
             <a href="{{ url_for('home') }}" class="logo-link">
                 <img src="{{ url_for('static', filename='images/Zentask.png') }}" alt="Zentask Logo" class="logo-img">
-                
             </a>
             <ul class="nav-links">
-                
                 <li><a href="{{ url_for('login') }}">Login</a></li>
                 <li><a href="{{ url_for('signup') }}">Signup</a></li>
+                <li><a href="{{ url_for('admin_login')}}">Admin</a></li>
             </ul>
         </div>
     </nav>

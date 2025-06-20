@@ -3,37 +3,45 @@ from flask import render_template
 from flask import request
 from flask import redirect
 from flask import url_for
-from flask import flash,jsonify
+from flask import flash, jsonify
 from flask import session
 from src.db import Execute
+from src.admindb import Admin
+from flask import make_response
 
-app=Flask(__name__)
-app.secret_key = 'your-secret-key'
+app = Flask(__name__)
+app.secret_key = "your-secret-key"
+
+
 @app.before_request
 def create():
     try:
-        e=Execute()
+        e = Execute()
         e.login_table()
         e.signup_table()
         e.task_table()
+        a = Admin()
+        a.admin_table()
     except Exception as e:
         print("table not created")
-    
+#<--------------------------------------------------------------------------------------------->#
+#USER CONTENTS
+
 @app.route("/")
 def home():
     return render_template("home.html")
+
+
 @app.route("/login", methods=["GET", "POST"])
 def login():
     try:
         if request.method == "POST":
             data = {
                 "email": request.form.get("email", "").strip().lower(),
-                "password": request.form.get("password", "")
+                "password": request.form.get("password", ""),
             }
-
             e = Execute()
             user = e.verify_login(data["email"], data["password"])
-
             if user:
                 session["user_id"] = user["signup_id"]
                 session["email"] = user["email"]
@@ -42,15 +50,44 @@ def login():
             else:
                 flash("Invalid email or password", "error")  # 🔴 Show error
                 return redirect(url_for("login"))
-
         return render_template("login.html")
-
     except Exception as e:
         print("Login error:", e)
-        flash("Something went wrong during login. Please try again.", "error")  # 🔴 Show exception flash
+        flash(
+            "Something went wrong during login. Please try again.", "error"
+        )  # 🔴 Show exception flash
         return render_template("login.html")
 
-@app.route('/signup', methods=["GET", "POST"])
+
+@app.route("/frgtpwd", methods=["GET", "POST"])
+def forgot_pwd():
+    if request.method == "POST":
+        data = {"email": request.form.get("email", "").strip().lower()}
+        e = Execute()
+        existing_user = e.verify_email(data["email"])
+        if not existing_user:
+            flash("User with this email does not exist.", "error")
+            return redirect(url_for("forgot_pwd"))
+        session["reset_email"] = data["email"]
+        return render_template("cnfrmpwd.html")
+    return render_template("frgtpwd.html")
+
+
+@app.route("/cnfrmpwd", methods=["GET", "POST"])
+def confirm_pwd():
+    if request.method == "POST":
+        data = {
+            "cnfpwd": request.form.get("cnfpwd", ""),
+            "email": session["reset_email"],
+        }
+        e = Execute()
+        e.update_pwd(data["cnfpwd"], data["email"])
+        return render_template("login.html")
+    return render_template("cnfrmpwd.html")
+
+
+
+@app.route("/signup", methods=["GET", "POST"])
 def signup():
     try:
         if request.method == "POST":
@@ -58,27 +95,23 @@ def signup():
                 "name": request.form.get("name").strip(),
                 "email": request.form.get("email").strip().lower(),
                 "username": request.form.get("username").strip().lower(),
-                "password": request.form.get("password")
+                "password": request.form.get("password"),
             }
-
             e = Execute()
             existing_user = e.verify_signup(data["username"], data["email"])
-
             if existing_user:
-                flash("User already exists. Try a different username or email.", "error")
+                flash(
+                    "User already exists. Try a different username or email.", "error"
+                )
                 return redirect(url_for("signup"))
-
             # ✅ Add user to DB
             e.signup_values(data)
-
             # ✅ Fetch the user back to get their signup_id
             user = e.verify_login(data["email"], data["password"])
             if user:
                 session["user_id"] = user["signup_id"]
                 session["email"] = user["email"]
-
             return redirect(url_for("dashboard"))
-
         return render_template("signup.html")
     except Exception as e:
         print("Signup error:", e)
@@ -86,71 +119,89 @@ def signup():
         return render_template("signup.html")
 
 
-    
-    
-    
 @app.route("/dashboard")
 def dashboard():
     try:
         if "email" not in session:
             flash("Please log in to view dashboard")
             return redirect(url_for("login"))
+
         e = Execute()
-        user_data = e.get_user_by_email(session["email"])  # You'll add this method
+        user_data = e.get_user_by_email(session["email"])
         username = user_data.get("username") if user_data else "User"
 
-        return render_template("dashboard.html", username=username)
+        response = make_response(render_template("dashboard.html", username=username))
+        response.headers["Cache-Control"] = (
+            "no-store, no-cache, must-revalidate, post-check=0, pre-check=0"
+        )
+        response.headers["Pragma"] = "no-cache"
+        response.headers["Expires"] = "0"
+        return response
     except Exception as e:
         print("Error loading dashboard:", e)
         flash("Error loading tasks. Please try again.")
         return redirect(url_for("login"))
-    
-@app.route("/api/get_tasks",methods=["GET"])
+
+
+@app.route("/api/get_tasks", methods=["GET"])
 def get_tasks():
     try:
         if "email" not in session:
-            return jsonify({"error":"Unauthorized"}),401
-        e=Execute()
-        tasks=e.get_tasks(session["email"])
-        
-        return jsonify({"tasks":tasks})
+            return jsonify({"error": "Unauthorized"}), 401
+        e = Execute()
+        tasks = e.get_tasks(session["email"])
+
+        return jsonify({"tasks": tasks})
     except Exception as e:
-        print("Error fetching tasks:",e)
-        return[]
-    
-@app.route("/new_task",methods=["POST","GET"])
+        print("Error fetching tasks:", e)
+        return []
+
+
+@app.route("/new_task", methods=["POST", "GET"])
 def new_tasks():
     try:
         if "email" not in session:
-            
             return redirect(url_for("login"))
+
         if request.method == "POST":
-            data={
-                "task":request.form.get("task").strip(),
-                "date":request.form.get("date").strip(),
-                "priority":request.form.get("priority").strip(),
-                "email":session["email"]
+            data = {
+                "task": request.form.get("task").strip(),
+                "date": request.form.get("date").strip(),
+                "priority": request.form.get("priority").strip(),
+                "email": session["email"],
             }
-            e=Execute()
+            e = Execute()
             e.insert_task(data)
             return redirect(url_for("dashboard"))
-        return render_template("new_task.html")
+
+        response = make_response(render_template("new_task.html"))
+        response.headers["Cache-Control"] = (
+            "no-store, no-cache, must-revalidate, post-check=0, pre-check=0"
+        )
+        response.headers["Pragma"] = "no-cache"
+        response.headers["Expires"] = "0"
+        return response
+
     except Exception as e:
-        print("Task not added:",e)
+        print("Task not added:", e)
+        return redirect(url_for("new_tasks"))
+    except Exception as e:
+        print("Task not added:", e)
         return redirect(url_for("new_task"))
 
-@app.route("/api/update_tasks",methods=["POST"])
+
+@app.route("/api/update_tasks", methods=["POST"])
 def update_tasks():
     try:
-        tasks=request.get_json()
-        e=Execute()
+        tasks = request.get_json()
+        e = Execute()
         for i in tasks:
             e.update_tasks(i)
-        return jsonify({"message":"Task updated"}),200
+        return jsonify({"message": "Task updated"}), 200
     except Exception as e:
-        print("Status not updated",e)
-        return jsonify({"error":"failed"}),500
-    
+        print("Status not updated", e)
+        return jsonify({"error": "failed"}), 500
+
 
 @app.route("/api/delete_tasks", methods=["POST"])
 def delete_tasks():
@@ -172,7 +223,8 @@ def delete_tasks():
     except Exception as e:
         print("Unable to delete task:", e)
         return jsonify({"error": "Internal server error"}), 500
-    
+
+
 @app.route("/api/update_task_status", methods=["POST"])
 def update_task_status():
     try:
@@ -195,10 +247,60 @@ def update_task_status():
         return jsonify({"error": "Internal server error"}), 500
 
 
+@app.after_request
+def add_cache_control_headers(response):
+    if request.endpoint in ["dashboard", "new_tasks"]:
+        response.headers["Cache-Control"] = (
+            "no-store, no-cache, must-revalidate, post-check=0, pre-check=0"
+        )
+        response.headers["Pragma"] = "no-cache"
+        response.headers["Expires"] = "0"
+    return response
+
+
 @app.route("/logout")
 def logout():
     session.clear()
+    flash("You have been logged out.", "success")
     return render_template("login.html")
+#<------------------------------------------------------------------------------------------------->#
+#ADMIN LOGIN
 
-if __name__=="__main__":
+@app.route("/adminlogin",methods=["GET","POST"])
+def admin_login():
+    if request.method == "POST":
+        data = {
+            "email":request.form.get("email"),
+            "password":request.form.get("password")
+        }
+        a=Admin()
+        existing_user = a.verify_admin(data["email"],data["password"])
+        if existing_user:
+            session["email"] = existing_user["email"]
+            return redirect(url_for("admin_dashboard",existing_user=existing_user["email"]))
+        else:
+            flash("Unauthorized access","error")
+            return redirect(url_for("admin_login"))
+    return render_template("adminlogin.html")
+
+@app.route("/admindashboard")
+def admin_dashboard():
+    try:
+        if "email" not in session:
+            flash("Please log in to view admin dashboard")
+            return redirect(url_for("admin_login"))
+        a = Admin()
+        response = make_response(render_template("admindashboard.html"))
+        response.headers["Cache-Control"] = (
+            "no-store, no-cache, must-revalidate, post-check=0, pre-check=0"
+        )
+        response.headers["Pragma"] = "no-cache"
+        response.headers["Expires"] = "0"
+        return response
+    except Exception as e:
+        print("Error loading admin dashboard:", e)
+        flash("Error loading admin dashboard. Please try again.")
+        return redirect(url_for("admin_login"))
+
+if __name__ == "__main__":
     app.run(debug=True)

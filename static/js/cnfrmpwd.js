@@ -67,16 +67,3 @@ function showFlashMessage(message, type = "success") {
         }, 400);
     }, 4000);
 }
-
-// 🔄 Force reload if page is shown from bfcache (browser back)
-window.addEventListener("pageshow", function (event) {
-    if (event.persisted || performance.getEntriesByType("navigation")[0]?.type === "back_forward") {
-        window.location.reload();
-    }
-});
-
-// ✅ Optional: DOM ready logic if needed
-document.addEventListener("DOMContentLoaded", function () {
-    // You can place any other logic here
-    console.log("Page fully loaded and session enforced if needed.");
-});
