@@ -1,5 +1,6 @@
 import mysql.connector
 from flask import jsonify
+import traceback
 
 class Admin:
     def __init__(self):
@@ -56,7 +57,50 @@ class Admin:
         except Exception as e:
             print("Admin verification error:", e)
 
-    
+    def get_user_by_email(self, email):
+        cur = None
+        try:
+            cur = self.conn.cursor(dictionary=True)
+            cur.execute(
+                "SELECT username FROM signup_details WHERE email = %s", (email,)
+            )
+            return cur.fetchone()
+        except Exception as e:
+            print("Error fetching user info:", e)
+            return None
+        finally:
+            if cur:
+                cur.close()
+
+    def signup_table(self):
+        cur = None
+        try:
+            cur = self.conn.cursor(dictionary=True)
+            cur.execute("select*from signup_details order by signup_id desc")
+            return cur.fetchall()
+        except Exception as e:
+            print("Error loading signup table:",e)
+            return[]
+        
+    def login_table(self):
+        cur = None
+        try:
+            cur = self.conn.cursor(dictionary=True)
+            cur.execute("select*from login_details order by login_id desc")
+            return cur.fetchall()
+        except Exception as e:
+            print("Error loading login table:",e)
+            return[]
+
+    def delete_by_id(self, signup_id):
+        cur = None
+        try:
+            cur = self.conn.cursor()
+            cur.execute("DELETE FROM signup_details WHERE signup_id = %s", (signup_id,))
+            return cur.rowcount > 0
+        except Exception as e:
+            print("Error deleting row", e)
+            return False
 
     def __del__(self):
         if self.conn:

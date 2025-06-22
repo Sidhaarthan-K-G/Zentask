@@ -24,8 +24,8 @@ def create():
         a.admin_table()
     except Exception as e:
         print("table not created")
-#<--------------------------------------------------------------------------------------------->#
-#USER CONTENTS
+# <--------------------------------------------------------------------------------------------->#
+# USER CONTENTS
 
 @app.route("/")
 def home():
@@ -48,14 +48,14 @@ def login():
                 e.login_values(data)
                 return redirect(url_for("dashboard", user=user["username"]))
             else:
-                flash("Invalid email or password", "error")  # 🔴 Show error
+                flash("Invalid email or password", "error")  
                 return redirect(url_for("login"))
         return render_template("login.html")
     except Exception as e:
         print("Login error:", e)
         flash(
             "Something went wrong during login. Please try again.", "error"
-        )  # 🔴 Show exception flash
+        )
         return render_template("login.html")
 
 
@@ -86,7 +86,6 @@ def confirm_pwd():
     return render_template("cnfrmpwd.html")
 
 
-
 @app.route("/signup", methods=["GET", "POST"])
 def signup():
     try:
@@ -104,9 +103,7 @@ def signup():
                     "User already exists. Try a different username or email.", "error"
                 )
                 return redirect(url_for("signup"))
-            # ✅ Add user to DB
             e.signup_values(data)
-            # ✅ Fetch the user back to get their signup_id
             user = e.verify_login(data["email"], data["password"])
             if user:
                 session["user_id"] = user["signup_id"]
@@ -263,8 +260,8 @@ def logout():
     session.clear()
     flash("You have been logged out.", "success")
     return render_template("login.html")
-#<------------------------------------------------------------------------------------------------->#
-#ADMIN LOGIN
+# <------------------------------------------------------------------------------------------------->#
+# ADMIN LOGIN
 
 @app.route("/adminlogin",methods=["GET","POST"])
 def admin_login():
@@ -277,20 +274,21 @@ def admin_login():
         existing_user = a.verify_admin(data["email"],data["password"])
         if existing_user:
             session["email"] = existing_user["email"]
-            return redirect(url_for("admin_dashboard",existing_user=existing_user["email"]))
+            return redirect(url_for("admindashboard",existing_user=existing_user["email"]))
         else:
             flash("Unauthorized access","error")
             return redirect(url_for("admin_login"))
     return render_template("adminlogin.html")
 
-@app.route("/admindashboard")
-def admin_dashboard():
+@app.route("/admin_dashboard")
+def admindashboard():
     try:
         if "email" not in session:
             flash("Please log in to view admin dashboard")
             return redirect(url_for("admin_login"))
         a = Admin()
-        response = make_response(render_template("admindashboard.html"))
+        user_data = a.get_user_by_email(session["email"])
+        response = make_response(render_template("admindashboard.html",user_data=user_data))
         response.headers["Cache-Control"] = (
             "no-store, no-cache, must-revalidate, post-check=0, pre-check=0"
         )
@@ -301,6 +299,106 @@ def admin_dashboard():
         print("Error loading admin dashboard:", e)
         flash("Error loading admin dashboard. Please try again.")
         return redirect(url_for("admin_login"))
+
+
+@app.route("/signuplog")
+def signuplog():
+    try:
+        if "email" not in session:
+            flash("Please log in to view dashboard")
+            return redirect(url_for("admin_login"))
+
+        # Only render template; data fetched via JS
+        response = make_response(render_template("adminsignuplog.html"))
+        response.headers["Cache-Control"] = (
+            "no-store, no-cache, must-revalidate, post-check=0, pre-check=0"
+        )
+        response.headers["Pragma"] = "no-cache"
+        response.headers["Expires"] = "0"
+        return response
+    except Exception as e:
+        print("❌ Error loading signuplog:", e)
+        flash("Error loading signup log. Please try again.")
+        return redirect(url_for("admin_login"))
+
+
+@app.route("/api/get_signup_log", methods=["GET"])
+def api_signup_log():
+    try:
+        if "email" not in session:
+            return jsonify({"error": "Unauthorized"}), 401
+
+        a = Admin()
+        data = a.signup_table()
+        return jsonify({"signup_table": data})
+    except Exception as e:
+        print("❌ Error fetching signup log:", e)
+        return jsonify({"error": "Internal Server Error"}), 500
+
+
+@app.route("/api/delete_user", methods=["POST"])
+def delete_user():
+    try:
+        if "email" not in session:
+            return redirect(url_for("admin_login"))
+
+        data = request.get_json()
+        if not data or "signup_id" not in data:
+            return jsonify({"error": "Invalid request"}), 400
+
+        signup_id = data["signup_id"]
+        a = Admin()
+        success = a.delete_by_id(signup_id)
+        if success:
+            return jsonify({"message": "User removed successfully"}), 200
+        else:
+            return jsonify({"error": "User not found or could not be removed"}), 404
+    except Exception as e:
+        print("Unable to remove user:", e)
+        return jsonify({"error": "Internal server error"}), 500
+
+
+@app.route("/loginlog")
+def loginlog():
+    try:
+        if "email" not in session:
+            flash("Please log in to view dashboard")
+            return redirect(url_for("admin_login"))
+
+        # Only render template; data fetched via JS
+        response = make_response(render_template("adminloginlog.html"))
+        response.headers["Cache-Control"] = (
+            "no-store, no-cache, must-revalidate, post-check=0, pre-check=0"
+        )
+        response.headers["Pragma"] = "no-cache"
+        response.headers["Expires"] = "0"
+        return response
+    except Exception as e:
+        print("❌ Error loading loginlog:", e)
+        flash("Error loading login log. Please try again.")
+        return redirect(url_for("admin_login"))
+
+
+@app.route("/api/get_login_log", methods=["GET"])
+def api_login_log():
+    try:
+        if "email" not in session:
+            return jsonify({"error": "Unauthorized"}), 401
+
+        a = Admin()
+        data = a.login_table()
+        return jsonify({"login_table": data})
+    except Exception as e:
+        print("❌ Error fetching login log:", e)
+        return jsonify({"error": "Internal Server Error"}), 500
+
+
+@app.route("/adminlogout")
+def adminlogout():
+    session.clear()
+    flash("You have been logged out.", "success")
+    return render_template("adminlogin.html")
+
 
 if __name__ == "__main__":
     app.run(debug=True)

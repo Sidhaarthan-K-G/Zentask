@@ -132,7 +132,7 @@ h5, h4, .mb-3 {
 
 /* Table Styling */
 /* Table Styling with Glassmorphism and White Text */
-#tasktable {
+#signuptable {
     width: 100%;
     border-collapse: collapse;
     table-layout: fixed;
@@ -145,8 +145,8 @@ h5, h4, .mb-3 {
     box-shadow: 0 4px 20px rgba(0,0,0,0.15);
 }
 
-#tasktable th,
-#tasktable td {
+#signuptable th,
+#signuptable td {
     white-space: nowrap;
     padding: 8px 12px;
     border: 1px solid rgba(255, 255, 255, 0.2) !important;
@@ -157,7 +157,7 @@ h5, h4, .mb-3 {
     color: white !important;  /* Ensure white text */
 }
 
-#tasktable thead th {
+#signuptable thead th {
     position: sticky;
     top: 0;
     background-color: rgba(42, 42, 58, 0.7) !important;
@@ -168,12 +168,12 @@ h5, h4, .mb-3 {
     font-size: large;
 }
 
-#tasktable tbody td {
+#signuptable tbody td {
     color: hsl(0, 0%, 0%) !important;
     font-size: large; /* Enforce white text for body cells */
 }
 
-#tasktable tbody tr:hover {
+#signuptable tbody tr:hover {
     background-color: rgba(255, 255, 255, 0.079) !important;
     backdrop-filter: blur(8px);
     -webkit-backdrop-filter: blur(8px);
@@ -366,29 +366,29 @@ button i,
 .centered-container h1 {
     color: #e0e0e0; /* or your desired text color */
 }
-
-/* WebKit browsers (Chrome, Edge, Safari) */
+/* Custom Scrollbar */
+/* Custom Dark Scrollbar */
 ::-webkit-scrollbar {
     width: 10px;
 }
 
 ::-webkit-scrollbar-track {
-    background: rgba(0, 0, 0, 0.2); /* dark track */
+    background: rgba(20, 20, 20, 0.5); /* dark translucent track */
     border-radius: 10px;
 }
 
 ::-webkit-scrollbar-thumb {
-    background-color: rgba(80, 80, 80, 0.8); /* dark gray thumb */
+    background-color: rgba(90, 90, 90, 0.8); /* dark thumb */
     border-radius: 10px;
-    border: 2px solid rgba(30, 30, 30, 0.3); /* subtle border for contrast */
+    border: 2px solid rgba(30, 30, 30, 0.4); /* optional border for contrast */
 }
 
 ::-webkit-scrollbar-thumb:hover {
     background-color: rgba(160, 160, 160, 0.9); /* lighter on hover */
 }
 
-/* Firefox */
+/* Firefox Support */
 * {
     scrollbar-width: thin;
-    scrollbar-color: rgba(100, 100, 100, 0.8) rgba(20, 20, 20, 0.2);
+    scrollbar-color: rgba(90, 90, 90, 0.8) rgba(20, 20, 20, 0.5);
 }
